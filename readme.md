@@ -36,14 +36,14 @@ def get_model(ckpt_name: str) -> MODNet: ...
 - `ckpt_name`: 模型的名字。只有`modnet_photographic_portrait_matting.ckpt`/`modnet_webcam_portrait_matting.ckpt`两种可选。
 
 ```python
-def get_model(ckpt_fullpath: str) -> MODNet: ...
+def get_model_from(ckpt_fullpath: str) -> MODNet: ...
 ```
 
 从外部导入模型。
 
 参数:
 
-- `ckpt_fullpath`: 模型的完整路径。
+- `ckpt_fullpath`: 外部模型的完整路径。
 
 <hr/>
 

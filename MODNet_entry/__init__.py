@@ -28,7 +28,7 @@ def get_model(ckpt_name: str) -> MODNet:
     modnet.eval()
     return modnet
 
-def get_model(ckpt_fullpath: str)-> MODNet:
+def get_model_from(ckpt_fullpath: str)-> MODNet:
     modnet = MODNet(backbone_pretrained=False)
     modnet = nn.DataParallel(modnet)
 
