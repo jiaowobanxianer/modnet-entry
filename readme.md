@@ -1,6 +1,6 @@
 # 【MODNet-entry】开箱即用的人像抠图工具
 
-由[项目连接](https://github.com/RimoChan/modnet-entry)fork。
+由[项目](https://github.com/RimoChan/modnet-entry)fork。
 模型效果参考看[原仓库](https://github.com/ZHKKKe/MODNet)。
 
 ## 安装
