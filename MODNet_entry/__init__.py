@@ -15,7 +15,7 @@ _here = os.path.dirname(os.path.abspath(__file__))
 
 
 def get_model(ckpt_name: str) -> MODNet:
-    ckpt_path = os.path.join(_here, 'MODNet', 'pretrained', ckpt_name)
+    ckpt_path = os.path.join(_here, "MODNet", "pretrained", ckpt_name)
     modnet = MODNet(backbone_pretrained=False)
     modnet = nn.DataParallel(modnet)
 
@@ -23,19 +23,18 @@ def get_model(ckpt_name: str) -> MODNet:
         modnet = modnet.cuda()
         weights = torch.load(ckpt_path)
     else:
-        weights = torch.load(ckpt_path, map_location=torch.device('cpu'))
+        weights = torch.load(ckpt_path, map_location=torch.device("cpu"))
     modnet.load_state_dict(weights)
     modnet.eval()
     return modnet
 
 
-def infer(modnet: MODNet, im: np.ndarray[np.uint8], ref_size=1024) -> np.ndarray[np.float32]:
+def infer(
+    modnet: MODNet, im: np.ndarray[np.uint8], ref_size=1024
+) -> np.ndarray[np.float32]:
     # define image to tensor transform
     im_transform = transforms.Compose(
-        [
-            transforms.ToTensor(),
-            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-        ]
+        [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
     )
 
     # unify image channels to 3
@@ -68,24 +67,42 @@ def infer(modnet: MODNet, im: np.ndarray[np.uint8], ref_size=1024) -> np.ndarray
 
     im_rw = im_rw - im_rw % 32
     im_rh = im_rh - im_rh % 32
-    im = F.interpolate(im, size=(im_rh, im_rw), mode='area')
+    im = F.interpolate(im, size=(im_rh, im_rw), mode="area")
 
     # inference
     _, _, matte = modnet(im.cuda() if torch.cuda.is_available() else im, True)
 
     # resize and save matte
-    matte = F.interpolate(matte, size=(im_h, im_w), mode='area')
+    matte = F.interpolate(matte, size=(im_h, im_w), mode="area")
     matte = matte[0][0].data.cpu().numpy()
     return matte
 
 
-def infer2(modnet: MODNet, img_path: str, out_alpha_path: str = '', out_img_path: str = '') -> np.ndarray[np.float32]:
+def jpginfer(
+    modnet: MODNet, img_path: str, out_alpha_path: str = "", out_img_path: str = ""
+) -> np.ndarray[np.float32]:
     assert out_alpha_path or out_img_path
     image = np.asarray(Image.open(img_path))
     alpha = infer(modnet, image)
-    alpha_uint8 = (alpha * 255).astype('uint8')
+    alpha_uint8 = (alpha * 255).astype("uint8")
     new_image = np.concatenate((image, alpha_uint8[:, :, None]), axis=2)
     if out_alpha_path:
-        Image.fromarray(alpha_uint8, mode='L').save(out_alpha_path)
+        Image.fromarray(alpha_uint8, mode="L").save(out_alpha_path)
     if out_img_path:
+        Image.fromarray(new_image).save(out_img_path)
+
+
+def pnginfer(
+    modnet: MODNet, img_path: str, out_alpha_path: str = "", out_img_path: str = ""
+) -> np.ndarray[np.float32]:
+    assert out_alpha_path or out_img_path
+    image = np.asarray(Image.open(img_path))
+    alpha = infer(modnet, image)
+    alpha_uint8 = (alpha * 255).astype("uint8")
+    image[:, :, 3] = alpha_uint8
+    new_image = image
+    if out_alpha_path:
+        Image.fromarray(alpha_uint8, mode="L").save(out_alpha_path)
+    if out_img_path:
+        new_image = new_image.astype(np.uint8)
         Image.fromarray(new_image).save(out_img_path)
