@@ -28,6 +28,18 @@ def get_model(ckpt_name: str) -> MODNet:
     modnet.eval()
     return modnet
 
+def get_model(ckpt_fullpath: str)-> MODNet:
+    modnet = MODNet(backbone_pretrained=False)
+    modnet = nn.DataParallel(modnet)
+
+    if torch.cuda.is_available():
+        modnet = modnet.cuda()
+        weights = torch.load(ckpt_fullpath)
+    else:
+        weights = torch.load(ckpt_fullpath, map_location=torch.device("cpu"))
+    modnet.load_state_dict(weights)
+    modnet.eval()
+    return modnet
 
 def infer(
     modnet: MODNet, im: np.ndarray[np.uint8], ref_size=1024

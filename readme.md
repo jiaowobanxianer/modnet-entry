@@ -1,34 +1,27 @@
 # 【MODNet-entry】开箱即用的人像抠图工具
 
-
-前几天我用stable-diffusion生成了几千张萝莉图片，准备用来做游戏立绘，但是它出的图都是带背景的……也不是不能抠啦，但是我一点手工活都不想做，所以就在GitHub上找了找有没有什么全自动抠人的模型。
-
-但是我找到的都没有方便的接口，一般都是给一个模型，然后给一堆代码，要自己加载自己调，很麻烦。所以我就给MODNet包了一层，可以直接用pip安装，这下就方便了！
-
-模型效果可以看[原仓库](https://github.com/ZHKKKe/MODNet)，我就不复制图片过来啦。
-
+由[项目连接](https://github.com/RimoChan/modnet-entry)fork。
+模型效果参考看[原仓库](https://github.com/ZHKKKe/MODNet)。
 
 ## 安装
 
 ```bash
-pip install git+https://github.com/RimoChan/modnet-entry.git
+pip install git+https://github.com/jiaowobanxianer/modnet-entry.git
 ```
 
-安装时会从Google Drive下载预训练模型，所以要保证你的网络是好的。
+安装时会从Google Drive下载预训练模型，所以要保证网络。
 
 ## 示例
 
-首先随便准备一张`test.png`，然后——
+首先随便准备一张`test.png`或者是`test.jpg`，然后——
 
 ```python
-from MODNet_entry import get_model, infer2
+from MODNet_entry import get_model, pnginfer, jpginfer
 
 model = get_model('modnet_photographic_portrait_matting.ckpt')
-infer2(model, 'test.png', 'alpha.png', 'new_image.png')
+pnginfer(model, 'test.png', 'alpha.png', 'new_image.png')
+#jpginfer(model, 'jpg.png', 'jpgalpha.png', 'new_jpgimage.png')
 ```
-
-这样就抠好啦，输出就是`alpha.png`和`new_image.png`这两张图。
-
 
 ## 接口
 
@@ -38,9 +31,19 @@ def get_model(ckpt_name: str) -> MODNet: ...
 
 获取一个预训练的模型。
 
-参数: 
+参数:
 
 - `ckpt_name`: 模型的名字。只有`modnet_photographic_portrait_matting.ckpt`/`modnet_webcam_portrait_matting.ckpt`两种可选。
+
+```python
+def get_model(ckpt_fullpath: str) -> MODNet: ...
+```
+
+从外部导入模型。
+
+参数:
+
+- `ckpt_fullpath`: 模型的完整路径。
 
 <hr/>
 
@@ -63,10 +66,10 @@ def infer(modnet: MODNet, im: np.ndarray[np.uint8], ref_size=1024) -> np.ndarray
 <hr/>
 
 ```python
-def infer2(modnet: MODNet, img_path: str, out_alpha_path: str = '', out_img_path: str = ''): ...
+def pnginfer(modnet: MODNet, img_path: str, out_alpha_path: str = '', out_img_path: str = ''): ...
 ```
 
-输入一个图片路径，将抠图结果保存在硬盘上。
+输入一个png图片路径，将抠图结果保存在硬盘上。
 
 参数: 
 
@@ -78,7 +81,15 @@ def infer2(modnet: MODNet, img_path: str, out_alpha_path: str = '', out_img_path
 
 - `out_img_path`: 输出抠好的图的路径。
 
+<hr/>
+
+```python
+def jpginfer(modnet: MODNet, img_path: str, out_alpha_path: str = '', out_img_path: str = ''): ...
+```
+
+输入一个jpg图片路径，将抠图结果保存在硬盘上。
+
+参数: 
+    同上
 
 ## 结束
-
-就这样，我要去看萝莉图片了，大家88！
